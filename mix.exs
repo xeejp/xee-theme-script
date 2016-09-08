@@ -7,12 +7,19 @@ defmodule XeeThemeScript.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
      package: package(),
      deps: deps()]
   end
 
   def application do
     [applications: [:logger]]
+  end
+
+  defp description do
+    """
+    A Behaviour Module to define a Xee theme.
+    """
   end
 
   defp package do
@@ -25,6 +32,6 @@ defmodule XeeThemeScript.Mixfile do
   end
 
   defp deps do
-    []
+    [{:ex_doc, "~> 0.13.0", only: :dev}]
   end
 end

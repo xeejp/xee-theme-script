@@ -5,23 +5,27 @@ defmodule XeeThemeScript do
   ## Examples
 
   def YourTheme do
-  use XeeThemeScript
+    use XeeThemeScript
 
-  # Callbacks
+    # Callbacks
 
-  def init, do: %{ids: MapSet.new(), logs: []}
+    def init, do: %{ids: MapSet.new(), logs: []}
 
-  def join(%{ids: ids} = data, id) do
-  {:ok, %{data | ids: MapSet.put(ids, id)}}
-  end
+    def join(%{ids: ids} = data, id) do
+      {:ok, %{data | ids: MapSet.put(ids, id)}}
+    end
 
-  def handle_received(data, received) do
-  handle_received(data, received, :host)
-  end
+    def handle_message(data, message, token) do
+      handle_received(data, message, token)
+    end
 
-  def handle_received(%{logs: logs} = data, received, id) do
-  {:ok, %{data | logs: [{id, received} | logs]}}
-  end
+    def handle_received(data, received) do
+      handle_received(data, received, :host)
+    end
+
+    def handle_received(%{logs: logs} = data, received, id) do
+      {:ok, %{data | logs: [{id, received} | logs]}}
+    end
   end
 
   """
@@ -38,7 +42,7 @@ defmodule XeeThemeScript do
   @callback install :: :ok | :error | {:error, reason :: term}
 
   @doc """
-  Invoked when experiment is being created.
+  Invoked before the experiment is created.
 
   Returning `{:ok, new_state}` sets the initial state to `new_state`.
   Returning `:error` or `{:error, reason}` fails the creating of experiment.
@@ -54,7 +58,7 @@ defmodule XeeThemeScript do
   @callback join(state :: term, id :: term) :: result
 
   @doc """
-  Invoked when experiment is created.
+  Invoked when the experiment receives data from a host.
 
   Returning `{:ok, new_state}` changes the state to `new_state`.
   Returning `:error` or `{:error, reason}` keeps the state.
@@ -62,12 +66,20 @@ defmodule XeeThemeScript do
   @callback handle_received(data :: term, received :: term) :: result
 
   @doc """
-  Invoked when experiment is created.
+  Invoked when the experiment receives data from a participant.
 
   Returning `{:ok, new_state}` changes the state to `new_state`.
   Returning `:error` or `{:error, reason}` keeps the state.
   """
   @callback handle_received(data :: term, received :: term, id :: term) :: result
+
+  @doc """
+  Invoked when the experiment receives a message from another experiment.
+
+  Returning `{:ok, new_state}` changes the state to `new_state`.
+  Returning `:error` or `{:error, reason}` keeps the state.
+  """
+  @callback handle_message(data :: term, message :: term, token :: term) :: result
 
   @doc false
   defmacro __using__(_) do
@@ -81,6 +93,9 @@ defmodule XeeThemeScript do
       def init, do: {:ok, nil}
       def script_type, do: :data
       def install, do: :ok
+      def handle_message(data, message, token) do
+        {:error, "There is no matched `handle_message/3`. data = #{inspect data}, message = #{inspect message}, token = #{token}"}
+      end
       def handle_received(data, received) do
         {:error, "There is no matched `handle_received/2`. data = #{inspect data}, received = #{inspect received}"}
       end
@@ -89,7 +104,7 @@ defmodule XeeThemeScript do
       end
 
       defoverridable [init: 0, install: 0, script_type: 0,
-       handle_received: 2, handle_received: 3]
+       handle_received: 2, handle_received: 3, handle_message: 3]
     end
   end
 

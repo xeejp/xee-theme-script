@@ -11,6 +11,10 @@ defmodule XeeThemeScript do
 
     def init, do: %{ids: MapSet.new(), logs: []}
 
+    def receive_meta(data, %{host_id: host_id, token: token}) do
+      {:ok, data}
+    end
+
     def join(%{ids: ids} = data, id) do
       {:ok, %{data | ids: MapSet.put(ids, id)}}
     end
@@ -93,6 +97,9 @@ defmodule XeeThemeScript do
       def init, do: {:ok, nil}
       def script_type, do: :data
       def install, do: :ok
+      def receive_meta(data, meta) do
+        {:error, "There is no matched `receive_meta/3`. data = #{inspect data}, meta = #{inspect meta}"}
+      end
       def handle_message(data, message, token) do
         {:error, "There is no matched `handle_message/3`. data = #{inspect data}, message = #{inspect message}, token = #{token}"}
       end
@@ -104,7 +111,7 @@ defmodule XeeThemeScript do
       end
 
       defoverridable [init: 0, install: 0, script_type: 0,
-       handle_received: 2, handle_received: 3, handle_message: 3]
+       handle_received: 2, handle_received: 3, handle_message: 3, receive_meta: 2]
     end
   end
 

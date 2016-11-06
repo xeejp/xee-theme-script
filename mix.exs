@@ -32,6 +32,6 @@ defmodule XeeThemeScript.Mixfile do
   end
 
   defp deps do
-    [{:ex_doc, "~> 0.13.0", only: :dev}]
+    [{:ex_doc, "~> 0.14.3", only: :dev}]
   end
 end
